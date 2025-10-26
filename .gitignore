@@ -1,0 +1,9 @@
+﻿bin/
+obj/
+out/
+build/
+.vs/
+.idea/
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
