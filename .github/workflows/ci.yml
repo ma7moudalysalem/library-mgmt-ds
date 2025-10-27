@@ -12,23 +12,25 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up CMake
-        uses: jwlawson/actions-setup-cmake@v1.14
-        with:
-          cmake-version: '3.28.0'
-
-      - name: Install dependencies
+      - name: Install dependencies (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
-          if [[ "$RUNNER_OS" == "Linux" ]]; then
-            sudo apt update && sudo apt install -y build-essential ninja-build
-          elif [[ "$RUNNER_OS" == "Windows" ]]; then
-            choco install ninja
-          fi
+          sudo apt-get update -y || true
+          sudo apt-get install -y build-essential cmake ninja-build || true
+          brew install cmake ninja || true
 
-      - name: Configure project
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install ninja cmake mingw -y
+          echo "CMAKE_GENERATOR=Ninja" >> $env:GITHUB_ENV
+          echo "PATH=$env:PATH;C:\ProgramData\chocolatey\bin;C:\Program Files\CMake\bin;C:\mingw\bin" >> $env:GITHUB_ENV
+
+      - name: Configure (CMake)
         run: cmake -S . -B build -G "Ninja"
 
       - name: Build
